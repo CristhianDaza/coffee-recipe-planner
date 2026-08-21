@@ -8,7 +8,6 @@ import {
   PreparationGuide,
   RecipeCard,
 } from "@/app/components/brew-planner";
-import { EspressoPlanner } from "@/app/components/espresso-planner";
 import { SavedRecipesDialog } from "@/app/components/saved-recipes";
 import { Hero, SavedToast, SiteFooter, SiteHeader } from "@/app/components/site-chrome";
 import {
@@ -206,7 +205,6 @@ export default function Home() {
         </div>
       </section>
       <PreparationGuide method={method} steps={steps} />
-      <EspressoPlanner />
       {focusOpen && (
         <BrewFocus
           method={method}

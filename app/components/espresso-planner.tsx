@@ -35,7 +35,7 @@ export function EspressoPlanner() {
           onShotStyleChange={setShotStyleId}
         />
         <aside className="espresso-recipe" aria-live="polite">
-          <div className="espresso-recipe-top"><span>3 · RECETA RESULTANTE</span><span>{drink.icon}</span></div>
+          <div className="espresso-recipe-top"><span>RECETA RESULTANTE</span><span>{drink.icon}</span></div>
           <h3>{drink.name}</h3>
           <p>Base {shotStyle.name.toLowerCase()} · {drink.subtitle}. Taza de {drink.cup}.</p>
           <div className="drink-composition">
@@ -71,7 +71,6 @@ function EspressoHeading() {
   return (
     <div className="espresso-heading">
       <div>
-        <span className="step-number">04</span>
         <div><p>RECETAS CON ESPRESSO</p><h2>Del shot a tu bebida favorita</h2></div>
       </div>
       <p>Base moderna de especialidad: proporción 1:2,<br />extracción de 25–30 segundos y leche a 55–65 °C.</p>
@@ -87,7 +86,7 @@ type DrinkPickerProps = {
 function DrinkPicker({ selectedId, onSelect }: DrinkPickerProps) {
   return (
     <div className="drink-picker">
-      <span className="picker-label">1 · ELIGE LA BEBIDA</span>
+      <span className="picker-label">ELIGE LA BEBIDA</span>
       <div className="drink-tabs" role="list" aria-label="Bebidas con espresso">
         {ESPRESSO_DRINKS.map((drink) => (
           <button
@@ -118,7 +117,7 @@ function EspressoControls(props: EspressoControlsProps) {
 
   return (
     <div className="espresso-controls">
-      <p className="eyebrow">2 · CONFIGURA EL SHOT</p>
+      <p className="eyebrow">CONFIGURA EL SHOT</p>
       <h3>La base de toda buena receta</h3>
       <div className="espresso-dose">
         <label>Dosis de café</label>

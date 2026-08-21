@@ -62,7 +62,7 @@ export function MethodSelector({ selectedMethod, onSelect }: MethodSelectorProps
   return (
     <>
       <div className="section-heading">
-        <div><span className="step-number">01</span><h2>Elige tu método</h2></div>
+        <div><h2>Elige tu método</h2></div>
         <p>Cada método tiene su propia personalidad.<br />¿Cuál se ajusta a tu momento?</p>
       </div>
       <div className="method-grid">
@@ -119,7 +119,6 @@ export function BrewControls(props: BrewControlsProps) {
   return (
     <div className="controls-panel">
       <div className="panel-title">
-        <span className="step-number">02</span>
         <div><h2>Ajusta las variables</h2><p>Pequeños cambios, grandes diferencias.</p></div>
       </div>
       <div className="control-block dose-control">
@@ -254,7 +253,6 @@ export function PreparationGuide({ method, steps }: { method: Method; steps: Pre
   return (
     <section className="guide" id="guide">
       <div className="guide-title">
-        <span className="step-number">03</span>
         <div><p>PASO A PASO · {method.name.toUpperCase()}</p><h2>Es hora de preparar</h2></div>
       </div>
       <div className="timeline">
@@ -325,6 +323,27 @@ export function BrewFocus(props: BrewFocusProps) {
           <p className="focus-step-time">{activeStep.time}</p>
           <h3>{activeStep.title}</h3><p>{activeStep.text}</p>
         </div>
+        <aside className="focus-upcoming" aria-label="Paso actual y próximos pasos">
+          <div className="focus-upcoming-title">
+            <span>PASO A PASO</span>
+            <small>{focusStep + 1} / {steps.length}</small>
+          </div>
+          <ol>
+            {steps.map((step, index) => (
+              <li
+                key={`${step.time}-${step.title}`}
+                className={index === focusStep ? "current" : index < focusStep ? "done" : "upcoming"}
+              >
+                <span>{step.time}</span>
+                <i aria-hidden="true" />
+                <div>
+                  <b>{step.title}</b>
+                  <small>{step.text}</small>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </aside>
       </div>
       <div className="focus-progress" style={progressStyle} aria-label={`Progreso de la receta: ${timeLabel}`}>
         {steps.map((step, index) => (

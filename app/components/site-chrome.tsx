@@ -1,13 +1,17 @@
+import Link from "next/link";
+
 type SiteHeaderProps = {
   theme: "light" | "dark";
-  savedRecipesCount: number;
+  savedRecipesCount?: number;
+  activePage?: "planner" | "espresso";
   onToggleTheme: () => void;
-  onOpenRecipes: () => void;
+  onOpenRecipes?: () => void;
 };
 
 export function SiteHeader({
   theme,
-  savedRecipesCount,
+  savedRecipesCount = 0,
+  activePage = "planner",
   onToggleTheme,
   onOpenRecipes,
 }: SiteHeaderProps) {
@@ -15,14 +19,18 @@ export function SiteHeader({
 
   return (
     <header className="site-header">
-      <a className="brand" href="#top">
-        <span className="brand-mark"><i /></span>
+      <Link className="brand" href="/">
+        <span className="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" role="img">
+            <path d="M7 12h15v7.5A6.5 6.5 0 0 1 15.5 26h-2A6.5 6.5 0 0 1 7 19.5V12Z" />
+            <path d="M22 15h2.5a3.5 3.5 0 0 1 0 7H22M11 8c-1.5-1.5 1.5-2.5 0-4M17 8c-1.5-1.5 1.5-2.5 0-4" />
+          </svg>
+        </span>
         <span>Coffee Recipe Planner</span>
-      </a>
+      </Link>
       <nav>
-        <a className="active" href="#planner">Planificador</a>
-        <a href="#guide">Guía</a>
-        <a href="#espresso">Espresso</a>
+        <Link className={`${activePage === "planner" ? "active" : ""} ${activePage === "espresso" ? "mobile-view-link" : ""}`.trim()} href="/#planner">Planificador</Link>
+        <Link className={`${activePage === "espresso" ? "active" : ""} ${activePage === "planner" ? "mobile-view-link" : ""}`.trim()} href="/espresso">Espresso</Link>
         <button
           className="theme-button"
           onClick={onToggleTheme}
@@ -31,10 +39,12 @@ export function SiteHeader({
         >
           <span aria-hidden="true">{theme === "light" ? "☾" : "☀"}</span>
         </button>
-        <button className="saved-button" onClick={onOpenRecipes}>
-          <span>♡</span> Mis recetas
-          {savedRecipesCount > 0 && <b>{savedRecipesCount}</b>}
-        </button>
+        {onOpenRecipes && (
+          <button className="saved-button" onClick={onOpenRecipes}>
+            <span>♡</span> Mis recetas
+            {savedRecipesCount > 0 && <b>{savedRecipesCount}</b>}
+          </button>
+        )}
       </nav>
     </header>
   );

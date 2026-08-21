@@ -50,21 +50,23 @@ button,a {
   font-weight: bold;
 }
 .brand-mark {
-  width: 28px;
-  height: 28px;
-  border: 2px solid var(--coral);
-  border-radius: 50% 55% 48% 58%;
-  transform: rotate(-25deg);
+  width: 32px;
+  height: 32px;
   display: grid;
   place-items: center;
 }
-.brand-mark i {
+.brand-mark svg {
   display: block;
-  width: 2px;
-  height: 20px;
-  background: var(--coral);
-  transform: rotate(20deg);
-  border-radius: 9px;
+  width: 32px;
+  height: 32px;
+  overflow: visible;
+}
+.brand-mark path {
+  fill: none;
+  stroke: var(--coral);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 nav {
   display: flex;
@@ -94,6 +96,10 @@ nav a.active:after {
   background: var(--coral);
 }
 .saved-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
   border: 1px solid var(--ink);
   background: transparent;
   border-radius: 99px;
@@ -102,6 +108,7 @@ nav a.active:after {
   font-weight: 700;
 }
 .saved-button span {
+  flex: none;
   color: var(--coral);
   font-size: 17px;
   margin-right: 5px;
@@ -117,6 +124,7 @@ nav a.active:after {
   background: var(--coral);
   color: #fff;
   font-size: 9px;
+  flex: none;
 }
 .hero {
   height: 390px;
@@ -925,12 +933,34 @@ footer a {
   nav a {
     display: none;
   }
+  nav a.mobile-view-link {
+    display: grid;
+    height: 36px;
+    padding: 0 10px;
+    border: 1px solid var(--line);
+    border-radius: 99px;
+    color: var(--ink);
+    font-size: 9px;
+  }
+  nav a.mobile-view-link:after {
+    display: none;
+  }
   nav {
-    gap: 0;
+    gap: 8px;
   }
   .saved-button {
-    padding: 8px 12px;
-    font-size: 11px;
+    min-height: 38px;
+    padding: 7px 11px;
+    font-size: 10px;
+  }
+  .saved-button span {
+    font-size: 15px;
+    margin-right: 4px;
+  }
+  .saved-button b {
+    min-width: 18px;
+    height: 18px;
+    margin-left: 6px;
   }
   .hero {
     height: 350px;
@@ -1002,6 +1032,14 @@ footer a {
     flex-direction: column;
     padding: 30px 20px;
     text-align: center;
+  }
+}
+@media(max-width:520px) {
+  .site-header {
+    padding: 12px 14px;
+  }
+  .brand>span:last-child {
+    display: none;
   }
 }
 .theme-button {
@@ -1138,6 +1176,10 @@ html[data-theme=dark] input[type=range]::-webkit-slider-thumb {
   padding: 76px max(calc((100vw - 1064px)/2),28px) 84px;
   background: #e8ded0;
   border-top: 1px solid var(--line);
+}
+.espresso-page .espresso-section {
+  min-height: calc(100vh - 178px);
+  border-top: 0;
 }
 .espresso-heading {
   display: flex;
@@ -1804,22 +1846,24 @@ html[data-theme=dark] .espresso-baseline div {
 }
 .focus-body {
   display: grid;
-  grid-template-columns: minmax(260px,.75fr) minmax(380px,1.25fr);
-  gap: 50px;
+  grid-template-columns: minmax(270px,.72fr) minmax(320px,.85fr) minmax(400px,1.2fr);
+  gap: clamp(28px,3.2vw,48px);
   align-items: center;
-  max-width: 1050px;
+  max-width: 1320px;
   width: 100%;
   margin: 0 auto;
 }
 .focus-timer {
+  min-width: 0;
   text-align: center;
 }
 .focus-timer>strong {
   display: block;
   font-family: Georgia,serif;
-  font-size: clamp(64px,10vw,116px);
+  font-size: clamp(64px,6.2vw,92px);
   line-height: 1;
   margin: 12px 0 20px;
+  white-space: nowrap;
 }
 .focus-metrics {
   display: flex;
@@ -1856,9 +1900,96 @@ html[data-theme=dark] .espresso-baseline div {
   color: #d1c4bb;
   max-width: 580px;
 }
+.focus-upcoming {
+  min-width: 0;
+  max-height: min(500px,60vh);
+  overflow: auto;
+}
+.focus-upcoming-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0 13px;
+  border-bottom: 1px solid #493a32;
+}
+.focus-upcoming-title span {
+  color: var(--coral);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 1.8px;
+}
+.focus-upcoming-title small {
+  color: #9f8f85;
+  font-size: 8px;
+}
+.focus-upcoming ol {
+  max-height: none;
+  margin: 0;
+  padding: 5px 0 0;
+  list-style: none;
+}
+.focus-upcoming li {
+  display: grid;
+  grid-template-columns: 54px 14px minmax(0,1fr);
+  gap: 10px;
+  align-items: start;
+  position: relative;
+  padding: 11px 0 13px;
+}
+.focus-upcoming li:not(:last-child):after {
+  content: "";
+  position: absolute;
+  top: 25px;
+  bottom: -12px;
+  left: 70px;
+  width: 1px;
+  background: #5a4940;
+}
+.focus-upcoming li>span {
+  padding-top: 1px;
+  color: var(--coral);
+  font-family: Georgia,serif;
+  font-size: 11px;
+  font-weight: 700;
+}
+.focus-upcoming li>i {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 10px;
+  height: 10px;
+  margin-top: 2px;
+  border-radius: 50%;
+  background: var(--coral);
+  box-shadow: 0 0 0 3px #16100d;
+}
+.focus-upcoming li b,.focus-upcoming li small {
+  display: block;
+}
+.focus-upcoming li b {
+  color: #fff;
+  font-family: Georgia,serif;
+  font-size: 16px;
+  line-height: 1.2;
+}
+.focus-upcoming li small {
+  margin-top: 7px;
+  color: #d1c4bb;
+  font-size: 9px;
+  line-height: 1.45;
+}
+.focus-upcoming li.done {
+  opacity: .68;
+}
+.focus-upcoming li.current>i {
+  box-shadow: 0 0 0 4px #e75f4535,0 0 0 7px #16100d;
+}
+.focus-upcoming li.upcoming>i {
+  background: #7b5b4e;
+}
 .focus-progress {
   display: flex;
-  max-width: 1050px;
+  max-width: 1320px;
   width: 100%;
   margin: 0 auto;
   position: relative;
@@ -1944,6 +2075,30 @@ html[data-theme=dark] .espresso-baseline div {
 html[data-theme=dark] .grind-guide {
   background: #251c17;
 }
+@media(max-width:1100px) and (min-width:761px) {
+  .brew-focus {
+    gap: 14px;
+  }
+  .focus-body {
+    grid-template-columns: minmax(230px,.75fr) minmax(360px,1.25fr);
+    gap: 24px 36px;
+  }
+  .focus-timer>strong {
+    font-size: clamp(60px,7vw,78px);
+  }
+  .focus-upcoming {
+    grid-column: 1/-1;
+    max-height: 220px;
+  }
+  .focus-upcoming ol {
+    display: block;
+    max-height: none;
+    padding: 5px 0 0;
+  }
+  .focus-upcoming li {
+    padding: 10px 0 12px;
+  }
+}
 @media(max-width:760px) {
   .grind-scale {
     grid-template-columns: 1fr;
@@ -1967,14 +2122,15 @@ html[data-theme=dark] .grind-guide {
   .brew-focus {
     padding: 20px 18px;
     gap: 14px;
+    overflow-y: auto;
   }
   .focus-top h2 {
     font-size: 18px;
   }
   .focus-body {
     grid-template-columns: 1fr;
-    gap: 18px;
-    align-content: center;
+    gap: 16px;
+    align-content: start;
   }
   .focus-timer>strong {
     font-size: 58px;
@@ -1989,6 +2145,21 @@ html[data-theme=dark] .grind-guide {
   }
   .focus-step>p:last-child {
     font-size: 13px;
+  }
+  .focus-upcoming {
+    max-height: 250px;
+  }
+  .focus-upcoming ol {
+    display: block;
+    max-height: none;
+    padding: 5px 0 0;
+  }
+  .focus-upcoming li {
+    grid-template-columns: 50px 14px minmax(0,1fr);
+    padding: 10px 0 12px;
+  }
+  .focus-upcoming li:not(:last-child):after {
+    left: 66px;
   }
   .focus-progress button {
     font-size: 0;
