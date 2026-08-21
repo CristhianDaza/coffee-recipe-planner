@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 type SiteHeaderProps = {
   theme: "light" | "dark";
@@ -59,6 +60,14 @@ export function Hero() {
         Ajusta cada variable y crea una receta que se adapte
         <br className="desktop-break" /> perfectamente a tu gusto.
       </p>
+      <Image
+        className="hero-og"
+        src="/og.png"
+        alt="Café filtrado preparado en V60"
+        width={360}
+        height={180}
+        sizes="(max-width: 760px) 0px, 27vw"
+      />
       <div className="bean bean-one" />
       <div className="bean bean-two" />
       <div className="blue-spark">✦</div>
