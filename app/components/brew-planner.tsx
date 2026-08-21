@@ -7,7 +7,7 @@ import {
   type Method,
   type RecipeProfile,
 } from "@/app/data/coffee";
-import type { PreparationStep } from "@/app/lib/recipes";
+import { parseStepTime, type PreparationStep } from "@/app/lib/recipes";
 
 type RangeControlProps = {
   label: string;
@@ -238,7 +238,9 @@ export function RecipeCard(props: RecipeCardProps) {
         <strong>{timeLabel}</strong>
         <div>
           <button className="timer-main" onClick={onOpenTimer}>{timerAction}</button>
-          <button className="timer-reset" onClick={onResetTimer} aria-label="Reiniciar">↺</button>
+          {(running || seconds > 0) && (
+            <button className="timer-reset" onClick={onResetTimer} aria-label="Reiniciar">↺</button>
+          )}
         </div>
       </div>
       <button className="save-recipe" onClick={onSave}>
@@ -280,14 +282,19 @@ type BrewFocusProps = {
   seconds: number;
   running: boolean;
   onClose: () => void;
+  onFinish: () => void;
   onStepChange: (step: number) => void;
   onRunningChange: (running: boolean) => void;
 };
 
 export function BrewFocus(props: BrewFocusProps) {
-  const { method, flavor, profile, steps, focusStep, coffee, water, temperature, timeLabel, seconds, running, onClose, onStepChange, onRunningChange } = props;
+  const { method, flavor, profile, steps, focusStep, coffee, water, temperature, timeLabel, seconds, running, onClose, onFinish, onStepChange, onRunningChange } = props;
   const activeStep = steps[focusStep];
   const primaryLabel = !running && seconds === 0 ? "Comenzar extracción" : running ? "Pausar temporizador" : "Continuar temporizador";
+  const progress = getTimelineProgress(steps, seconds, running || seconds > 0);
+  const progressStyle = {
+    "--focus-progress": `${progress}%`,
+  } as CSSProperties;
 
   function handlePrimaryAction() {
     if (!running && seconds === 0) {
@@ -319,7 +326,7 @@ export function BrewFocus(props: BrewFocusProps) {
           <h3>{activeStep.title}</h3><p>{activeStep.text}</p>
         </div>
       </div>
-      <div className="focus-progress">
+      <div className="focus-progress" style={progressStyle} aria-label={`Progreso de la receta: ${timeLabel}`}>
         {steps.map((step, index) => (
           <button
             key={`${step.time}-${step.title}`}
@@ -334,8 +341,43 @@ export function BrewFocus(props: BrewFocusProps) {
       <div className="focus-actions">
         <button className="focus-secondary" onClick={() => onStepChange(Math.max(0, focusStep - 1))} disabled={focusStep === 0}>← Anterior</button>
         <button className="focus-primary" onClick={handlePrimaryAction}>{primaryLabel}</button>
+        {(running || seconds > 0) && <button className="focus-finish" onClick={onFinish}>Terminar receta</button>}
         <button className="focus-secondary" onClick={() => onStepChange(Math.min(steps.length - 1, focusStep + 1))} disabled={focusStep === steps.length - 1}>Siguiente →</button>
       </div>
     </div>
   );
+}
+
+function getTimelineProgress(
+  steps: PreparationStep[],
+  seconds: number,
+  hasStarted: boolean,
+) {
+  if (steps.length === 0) return 0;
+
+  const circlePosition = (index: number) => ((index + 0.5) / steps.length) * 100;
+  if (!hasStarted) return circlePosition(0);
+
+  const timedSteps = steps.flatMap((step, index) => {
+    const time = parseStepTime(step.time);
+    return time === null ? [] : [{ index, time }];
+  });
+  if (timedSteps.length === 0) return circlePosition(0);
+
+  const first = timedSteps[0];
+  if (seconds <= first.time) return circlePosition(first.index);
+
+  for (let index = 1; index < timedSteps.length; index += 1) {
+    const previous = timedSteps[index - 1];
+    const next = timedSteps[index];
+    if (seconds <= next.time) {
+      const interval = Math.max(next.time - previous.time, 1);
+      const elapsed = (seconds - previous.time) / interval;
+      const start = circlePosition(previous.index);
+      const end = circlePosition(next.index);
+      return start + (end - start) * elapsed;
+    }
+  }
+
+  return circlePosition(timedSteps[timedSteps.length - 1].index);
 }

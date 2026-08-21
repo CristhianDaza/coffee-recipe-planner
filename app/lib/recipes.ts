@@ -77,7 +77,7 @@ export function buildSteps(
     { time: "ANTES", title: "Prepara el V60", text: "Enjuaga el filtro con agua caliente, precalienta el recipiente y añade el café nivelado." },
     { time: "00:00", title: "Preinfusión", text: `Vierte ${bloom} ml, cubre todo el café y espera ${bloomTime} segundos.` },
     { time: formatClock(bloomTime), title: "Primer vertido", text: `Vierte en círculos controlados hasta alcanzar ${first} ml.` },
-    { time: formatClock(bloomTime + 45), title: "Vertido final", text: `Completa hasta ${water} ml con un flujo constante y deja escurrir sin agitar el lecho.` },
+      { time: formatClock(bloomTime + 60), title: "Vertido final", text: `Completa hasta ${water} ml con un flujo constante y deja escurrir sin agitar el lecho.` },
   ];
 }
 

@@ -110,6 +110,12 @@ export default function Home() {
     }
   }
 
+  function finishRecipe() {
+    resetTimer();
+    setFocusOpen(false);
+    showToast("Receta terminada");
+  }
+
   function toggleTheme() {
     const nextTheme = theme === "light" ? "dark" : "light";
     setTheme(nextTheme);
@@ -215,6 +221,7 @@ export default function Home() {
           seconds={seconds}
           running={running}
           onClose={closeFocus}
+          onFinish={finishRecipe}
           onStepChange={setFocusStep}
           onRunningChange={setRunning}
         />
