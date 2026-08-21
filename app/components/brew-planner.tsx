@@ -160,6 +160,17 @@ export function BrewControls(props: BrewControlsProps) {
 }
 
 function GrindGuide({ recommendedGrind }: { recommendedGrind: string }) {
+  const normalizeGrind = (grind: string) =>
+    grind
+      .trim()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLocaleLowerCase("es")
+      .split("-")
+      .map((part) => (part.endsWith("a") ? `${part.slice(0, -1)}o` : part))
+      .join("-");
+  const recommendedGrindKey = normalizeGrind(recommendedGrind);
+
   return (
     <details className="grind-guide">
       <summary>
@@ -170,7 +181,7 @@ function GrindGuide({ recommendedGrind }: { recommendedGrind: string }) {
       <div className="grind-direction"><span>← Más fino</span><span>Más grueso →</span></div>
       <div className="grind-scale">
         {GRIND_LEVELS.map((level) => {
-          const isRecommended = recommendedGrind === level.name;
+          const isRecommended = recommendedGrindKey === normalizeGrind(level.name);
           const grainStyle = { "--grain": `${level.size}px` } as CSSProperties;
           return (
             <div key={level.name} className={isRecommended ? "active" : ""}>
