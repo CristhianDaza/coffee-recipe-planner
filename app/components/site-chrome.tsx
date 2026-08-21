@@ -1,10 +1,16 @@
 type SiteHeaderProps = {
   theme: "light" | "dark";
+  savedRecipesCount: number;
   onToggleTheme: () => void;
-  onSave: () => void;
+  onOpenRecipes: () => void;
 };
 
-export function SiteHeader({ theme, onToggleTheme, onSave }: SiteHeaderProps) {
+export function SiteHeader({
+  theme,
+  savedRecipesCount,
+  onToggleTheme,
+  onOpenRecipes,
+}: SiteHeaderProps) {
   const nextTheme = theme === "light" ? "oscuro" : "claro";
 
   return (
@@ -25,8 +31,9 @@ export function SiteHeader({ theme, onToggleTheme, onSave }: SiteHeaderProps) {
         >
           <span aria-hidden="true">{theme === "light" ? "☾" : "☀"}</span>
         </button>
-        <button className="saved-button" onClick={onSave}>
+        <button className="saved-button" onClick={onOpenRecipes}>
           <span>♡</span> Mis recetas
+          {savedRecipesCount > 0 && <b>{savedRecipesCount}</b>}
         </button>
       </nav>
     </header>
@@ -62,6 +69,6 @@ export function SiteFooter() {
   );
 }
 
-export function SavedToast() {
-  return <div className="toast" role="status">Tu receta quedó guardada <span>✓</span></div>;
+export function SavedToast({ message }: { message: string }) {
+  return <div className="toast" role="status">{message} <span>✓</span></div>;
 }

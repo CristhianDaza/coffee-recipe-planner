@@ -9,6 +9,7 @@ import {
   RecipeCard,
 } from "@/app/components/brew-planner";
 import { EspressoPlanner } from "@/app/components/espresso-planner";
+import { SavedRecipesDialog } from "@/app/components/saved-recipes";
 import { Hero, SavedToast, SiteFooter, SiteHeader } from "@/app/components/site-chrome";
 import {
   METHODS,
@@ -23,6 +24,12 @@ import {
   getProfile,
   parseStepTime,
 } from "@/app/lib/recipes";
+import {
+  addOrUpdateRecipe,
+  readSavedRecipes,
+  writeSavedRecipes,
+  type SavedRecipe,
+} from "@/app/lib/saved-recipes";
 
 type Theme = "light" | "dark";
 
@@ -34,7 +41,9 @@ export default function Home() {
   const [flavor, setFlavor] = useState<Flavor>("Equilibrada");
   const [seconds, setSeconds] = useState(0);
   const [running, setRunning] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [savedRecipes, setSavedRecipes] = useState<SavedRecipe[]>([]);
+  const [recipesOpen, setRecipesOpen] = useState(false);
   const [theme, setTheme] = useState<Theme>("light");
   const [focusOpen, setFocusOpen] = useState(false);
   const [focusStep, setFocusStep] = useState(0);
@@ -55,11 +64,14 @@ export default function Home() {
     setFocusOpen(false);
     setRunning(false);
   }, []);
+  const closeRecipes = useCallback(() => setRecipesOpen(false), []);
 
   useThemeInitialization(setTheme);
+  useSavedRecipesInitialization(setSavedRecipes);
   useBrewTimer(running, setSeconds);
   useActivePreparationStep({ running, focusOpen, seconds, steps, setFocusStep });
-  useFocusDialog({ focusOpen, onClose: closeFocus });
+  useModalBehavior({ isOpen: focusOpen, onClose: closeFocus });
+  useModalBehavior({ isOpen: recipesOpen, onClose: closeRecipes });
 
   useEffect(() => {
     return () => {
@@ -105,15 +117,53 @@ export default function Home() {
     window.localStorage.setItem("coffee-theme", nextTheme);
   }
 
-  function flashSaved() {
-    setSaved(true);
+  function showToast(message: string) {
+    setToastMessage(message);
     if (savedTimeoutRef.current) window.clearTimeout(savedTimeoutRef.current);
-    savedTimeoutRef.current = window.setTimeout(() => setSaved(false), 2200);
+    savedTimeoutRef.current = window.setTimeout(() => setToastMessage(null), 2200);
+  }
+
+  function saveCurrentRecipe() {
+    const nextRecipes = addOrUpdateRecipe(savedRecipes, {
+      methodId,
+      flavor,
+      coffee,
+      ratio,
+      temperature,
+    });
+    setSavedRecipes(nextRecipes);
+    writeSavedRecipes(nextRecipes);
+    showToast("Receta guardada");
+  }
+
+  function loadSavedRecipe(recipe: SavedRecipe) {
+    setMethodId(recipe.methodId);
+    setFlavor(recipe.flavor);
+    setCoffee(recipe.coffee);
+    setRatio(recipe.ratio);
+    setTemperature(recipe.temperature);
+    resetTimer();
+    setRecipesOpen(false);
+    showToast("Receta cargada");
+    window.requestAnimationFrame(() => {
+      document.getElementById("planner")?.scrollIntoView({ behavior: "smooth" });
+    });
+  }
+
+  function deleteSavedRecipe(id: string) {
+    const nextRecipes = savedRecipes.filter((recipe) => recipe.id !== id);
+    setSavedRecipes(nextRecipes);
+    writeSavedRecipes(nextRecipes);
   }
 
   return (
     <main>
-      <SiteHeader theme={theme} onToggleTheme={toggleTheme} onSave={flashSaved} />
+      <SiteHeader
+        theme={theme}
+        savedRecipesCount={savedRecipes.length}
+        onToggleTheme={toggleTheme}
+        onOpenRecipes={() => setRecipesOpen(true)}
+      />
       <Hero />
       <section className="planner-shell" id="planner">
         <MethodSelector selectedMethod={method} onSelect={chooseMethod} />
@@ -142,10 +192,10 @@ export default function Home() {
             timeLabel={timeLabel}
             seconds={seconds}
             running={running}
-            saved={saved}
+            saved={toastMessage === "Receta guardada"}
             onOpenTimer={openTimer}
             onResetTimer={resetTimer}
-            onSave={flashSaved}
+            onSave={saveCurrentRecipe}
           />
         </div>
       </section>
@@ -169,7 +219,15 @@ export default function Home() {
           onRunningChange={setRunning}
         />
       )}
-      {saved && <SavedToast />}
+      {recipesOpen && (
+        <SavedRecipesDialog
+          recipes={savedRecipes}
+          onClose={closeRecipes}
+          onLoad={loadSavedRecipe}
+          onDelete={deleteSavedRecipe}
+        />
+      )}
+      {toastMessage && <SavedToast message={toastMessage} />}
       <SiteFooter />
     </main>
   );
@@ -183,6 +241,14 @@ function useThemeInitialization(setTheme: (theme: Theme) => void) {
     setTheme(initialTheme);
     document.documentElement.dataset.theme = initialTheme;
   }, [setTheme]);
+}
+
+function useSavedRecipesInitialization(
+  setSavedRecipes: (recipes: SavedRecipe[]) => void,
+) {
+  useEffect(() => {
+    setSavedRecipes(readSavedRecipes());
+  }, [setSavedRecipes]);
 }
 
 function useBrewTimer(running: boolean, setSeconds: (updater: (value: number) => number) => void) {
@@ -215,9 +281,9 @@ function useActivePreparationStep(options: ActiveStepOptions) {
   }, [running, focusOpen, seconds, steps, setFocusStep]);
 }
 
-function useFocusDialog({ focusOpen, onClose }: { focusOpen: boolean; onClose: () => void }) {
+function useModalBehavior({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   useEffect(() => {
-    if (!focusOpen) return;
+    if (!isOpen) return;
     document.body.style.overflow = "hidden";
 
     function handleKeyDown(event: KeyboardEvent) {
@@ -229,5 +295,5 @@ function useFocusDialog({ focusOpen, onClose }: { focusOpen: boolean; onClose: (
       document.body.style.overflow = "";
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [focusOpen, onClose]);
+  }, [isOpen, onClose]);
 }
