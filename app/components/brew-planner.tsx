@@ -276,6 +276,7 @@ type BrewFocusProps = {
   coffee: number;
   water: number;
   temperature: number;
+  recipeTime: string;
   timeLabel: string;
   seconds: number;
   running: boolean;
@@ -286,7 +287,7 @@ type BrewFocusProps = {
 };
 
 export function BrewFocus(props: BrewFocusProps) {
-  const { method, flavor, profile, steps, focusStep, coffee, water, temperature, timeLabel, seconds, running, onClose, onFinish, onStepChange, onRunningChange } = props;
+  const { method, flavor, profile, steps, focusStep, coffee, water, temperature, recipeTime, timeLabel, seconds, running, onClose, onFinish, onStepChange, onRunningChange } = props;
   const activeStep = steps[focusStep];
   const primaryLabel = !running && seconds === 0 ? "Comenzar extracción" : running ? "Pausar temporizador" : "Continuar temporizador";
   const progress = getTimelineProgress(steps, seconds, running || seconds > 0);
@@ -316,6 +317,7 @@ export function BrewFocus(props: BrewFocusProps) {
           <div className="focus-metrics">
             <span>{coffee} g café</span><span>{water} ml agua</span>
             <span>{temperature} °C</span><span>{profile.grind}</span>
+            <span>Duración estimada: {recipeTime}</span>
           </div>
         </div>
         <div className="focus-step">

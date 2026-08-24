@@ -61,7 +61,6 @@ export default function Home() {
   );
   const closeFocus = useCallback(() => {
     setFocusOpen(false);
-    setRunning(false);
   }, []);
   const closeRecipes = useCallback(() => setRecipesOpen(false), []);
 
@@ -215,6 +214,7 @@ export default function Home() {
           coffee={coffee}
           water={water}
           temperature={temperature}
+          recipeTime={recipeTime}
           timeLabel={timeLabel}
           seconds={seconds}
           running={running}
