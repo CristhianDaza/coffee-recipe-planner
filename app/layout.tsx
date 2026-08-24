@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://coffee.cris-dev.com"),
   title: "Coffee Recipe Planner",
   description:
     "Crea y ajusta tu receta de café perfecta: método, proporción, temperatura y preparación paso a paso.",
@@ -29,7 +30,7 @@ type RootLayoutProps = Readonly<{
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="es">
+    <html lang="es" data-scroll-behavior="smooth">
       <body>{children}</body>
     </html>
   );

@@ -66,6 +66,7 @@ export function Hero() {
         alt="Café filtrado preparado en V60"
         width={360}
         height={180}
+        loading="eager"
         sizes="(max-width: 760px) 0px, 27vw"
       />
       <div className="bean bean-one" />
