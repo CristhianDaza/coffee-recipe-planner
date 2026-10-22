@@ -33,7 +33,7 @@ Los estados de selección incluyen bordes y atributos semánticos, además del c
 
 - Contenedor máximo de 1184 px; márgenes de 20 px en móvil.
 - Navegación visible de Filtrados y Espresso en todos los tamaños.
-- Cuatro métodos en escritorio, dos columnas en móvil.
+- Seis métodos en tres columnas en escritorio, dos columnas en móvil.
 - Variables y receta en dos columnas; una columna hasta 760 px.
 - Receta visible al desplazarse en escritorio, sin fijación en móvil.
 - Preparación móvil con instrucciones desplazables y acciones siempre visibles.

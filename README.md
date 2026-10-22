@@ -8,7 +8,7 @@ El proyecto busca hacer accesibles los principios del café de especialidad sin 
 
 ### Métodos filtrados
 
-El planificador incluye cuatro métodos de preparación:
+El planificador incluye seis métodos de preparación:
 
 - V60
 - Chemex
@@ -50,8 +50,12 @@ El módulo de espresso permite configurar la dosis y elegir entre ristretto, esp
 - Cortado
 - Macchiato
 - Mocha
+- Long black
+- Piccolo
+- Latte frío
+- Affogato
 
-Las cantidades de agua y leche se adaptan proporcionalmente a la dosis seleccionada. También se muestran referencias de extracción, composición de la bebida, temperatura de la leche y recomendaciones de calibración.
+Los ingredientes se ajustan a la dosis: chocolate, hielo y helado incluidos. El long black adapta su agua al rendimiento del shot; el cortado ofrece una referencia de leche que se ajusta al servir. La capacidad sugerida del recipiente también cambia con la receta. También se muestran referencias de extracción, composición de la bebida, temperatura de la leche y recomendaciones de calibración.
 
 ### Experiencia visual
 
@@ -104,3 +108,21 @@ La aplicación no requiere cuentas. Las recetas se almacenan localmente en el na
 ## Sistema visual
 
 La dirección visual, los tokens de ambos temas y los patrones de interacción se documentan en [el sistema de diseño](design-system/coffee-recipe-planner/MASTER.md).
+
+## Recetas verificadas
+
+Las preparaciones incluyen fuentes consultables, fecha de revisión y notas que
+separan la receta publicada de las adaptaciones de la aplicación. Consulta la
+[revisión de recetas y fuentes](docs/recipe-review.md) para conocer el criterio,
+las correcciones y los límites de cada referencia.
+
+En filtrados, la proporción usa gramos de café frente a gramos de agua añadida;
+no predice el volumen final en la taza. AeroPress divide la cantidad total entre
+infusión y dilución cuando excede el volumen de trabajo elegido para la cámara.
+
+Para comprobar los cálculos y la compatibilidad de recetas guardadas con Node.js 24:
+
+```sh
+npm test
+npm run build
+```

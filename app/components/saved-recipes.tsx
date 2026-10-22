@@ -80,7 +80,7 @@ function SavedRecipeItem({ recipe, onLoad, onDelete }: SavedRecipeItemProps) {
       </div>
       <div className="saved-recipe-metrics">
         <span><small>Café</small><b>{recipe.coffee} g</b></span>
-        <span><small>Agua</small><b>{water} ml</b></span>
+        <span><small>Agua total</small><b>{water} g</b></span>
         <span><small>Proporción</small><b>1 : {recipe.ratio}</b></span>
         <span><small>Temperatura</small><b>{recipe.temperature} °C</b></span>
       </div>

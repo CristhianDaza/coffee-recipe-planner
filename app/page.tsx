@@ -12,6 +12,9 @@ import { SavedRecipesDialog } from "@/app/components/saved-recipes";
 import { Hero, SavedToast, SiteFooter, SiteHeader } from "@/app/components/site-chrome";
 import {
   METHODS,
+  RECIPES,
+  getMaxDose,
+  getDoseOptions,
   type Flavor,
   type Method,
   type MethodId,
@@ -37,7 +40,7 @@ type Theme = "light" | "dark";
 export default function Home() {
   const [methodId, setMethodId] = useState<MethodId>("v60");
   const [coffee, setCoffee] = useState(20);
-  const [ratio, setRatio] = useState(15);
+  const [ratio, setRatio] = useState(RECIPES.v60.Equilibrada.ratio);
   const [temperature, setTemperature] = useState(94);
   const [flavor, setFlavor] = useState<Flavor>("Equilibrada");
   const [seconds, setSeconds] = useState(0);
@@ -56,8 +59,8 @@ export default function Home() {
   const water = Math.round(coffee * ratio);
   const recipeTime = formatTimeRange(profile.minTime, profile.maxTime);
   const timeLabel = formatClock(seconds);
-  const doseOptions = methodId === "aero" ? [15, 18, 20] : [15, 20, 30];
-  const maxDose = methodId === "aero" ? 20 : 60;
+  const doseOptions = getDoseOptions(methodId);
+  const maxDose = getMaxDose(methodId);
   const steps = useMemo(
     () => buildSteps(methodId, flavor, coffee, water),
     [methodId, flavor, coffee, water],
@@ -83,7 +86,7 @@ export default function Home() {
   function chooseMethod(nextMethod: Method) {
     const nextProfile = getProfile(nextMethod.id, flavor);
     setMethodId(nextMethod.id);
-    setCoffee((value) => nextMethod.id === "aero" ? Math.min(value, 20) : value);
+    setCoffee((value) => Math.min(value, getMaxDose(nextMethod.id)));
     setRatio(nextProfile.ratio);
     setTemperature(nextProfile.temp);
     resetTimer();

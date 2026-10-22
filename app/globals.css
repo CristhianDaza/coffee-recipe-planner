@@ -398,7 +398,7 @@ nav a:hover {
 
 .method-grid {
   display: grid;
-  grid-template-columns: repeat(4,minmax(0,1fr));
+  grid-template-columns: repeat(3,minmax(0,1fr));
   gap: 12px;
 }
 
@@ -2287,4 +2287,28 @@ footer a {
   .focus-timer > strong { font-size: 48px; margin: 8px 0; }
   .focus-step h3 { font-size: 28px; }
   .focus-actions button { padding-block: 8px; }
+}
+
+.recipe-sources {
+  margin-top: 24px;
+  border-top: 1px solid var(--line);
+  font-size: 13px;
+}
+.recipe-sources summary {
+  cursor: pointer;
+  color: var(--coral);
+  font-weight: 600;
+  padding: 12px 4px;
+}
+.recipe-sources > div { padding: 0 4px 8px; }
+.recipe-sources p { color: var(--muted); margin-bottom: 12px; }
+.recipe-sources ul { list-style: disc; padding-left: 20px; margin: 0 0 16px; }
+.recipe-sources a { display: inline-block; padding-block: 8px; text-underline-offset: 3px; }
+.recipe-sources a:hover { color: var(--coral); }
+.source-review { font-size: 12px; }
+.source-new-window { font-size: 11px; color: var(--muted); }
+.brew-water-note { margin: 16px 0 0; padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); font-size: 13px; }
+.control-block .field-hint + .scale { margin-top: 8px; }
+@media (max-width: 760px) {
+  .method-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

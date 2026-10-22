@@ -1,11 +1,13 @@
 import type { SVGProps } from "react";
 
-type IconName = "cup" | "filter" | "chemex" | "press" | "aero" | "sun" | "moon" | "bookmark" | "check" | "arrow" | "play" | "reset" | "close";
+type IconName = "cup" | "filter" | "chemex" | "kalita" | "clever" | "press" | "aero" | "sun" | "moon" | "bookmark" | "check" | "arrow" | "play" | "reset" | "close";
 
 const paths: Record<IconName, React.ReactNode> = {
   cup: <><path d="M4 8h13v7a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V8ZM17 9h2a3 3 0 1 1 0 6h-2M8 3v2m5-2v2" /></>,
   filter: <><path d="m3 5 9 11 9-11H3Zm4 14h10M12 16v3M7 5l5 11 5-11" /></>,
   chemex: <><path d="m6 3 4 8-5 9c-.3.5 0 1 1 1h12c1 0 1.3-.5 1-1l-5-9 4-8H6Zm3 9h6M8 17h8" /></>,
+  kalita: <><path d="M4 5h16l-4 12H8L4 5Zm-2 15h20M7 9h10M8 13h8" /></>,
+  clever: <><path d="M4 4h16l-5 13H9L4 4Zm8 13v4M5 21h14M20 6h1a2 2 0 0 1 0 4h-2" /></>,
   press: <><path d="M5 7h12v14H5V7Zm12 2h2a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M4 7h14M11 3v12M8 3h6M7 15h8" /></>,
   aero: <><path d="M7 7h10v13H7V7ZM9 3h6v4M5 20h14M5 7h14M10 11h4m-4 4h4" /></>,
   sun: <><circle cx="12" cy="12" r="4" /><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5" /></>,
@@ -23,5 +25,5 @@ export function Icon({ name, ...props }: SVGProps<SVGSVGElement> & { name: IconN
 }
 
 export function MethodIcon({ id }: { id: string }) {
-  return <Icon name={id === "v60" ? "filter" : id === "chemex" ? "chemex" : id === "french" ? "press" : id === "aero" ? "aero" : "cup"} />;
+  return <Icon name={id === "kalita" ? "kalita" : id === "clever" ? "clever" : id === "v60" ? "filter" : id === "chemex" ? "chemex" : id === "french" ? "press" : id === "aero" ? "aero" : "cup"} />;
 }

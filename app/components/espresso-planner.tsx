@@ -8,25 +8,30 @@ import {
   type EspressoDrinkId,
   type ShotStyleId,
 } from "@/app/data/coffee";
-import { buildEspressoSteps } from "@/app/lib/recipes";
+import { buildEspressoRecipe } from "@/app/lib/recipes";
+
+import { RecipeSources } from "./recipe-sources";
+import { ESPRESSO_EVIDENCE } from "@/app/data/recipe-sources";
 
 export function EspressoPlanner() {
   const [drinkId, setDrinkId] = useState<EspressoDrinkId>("espresso");
   const [dose, setDose] = useState(18);
   const [shotStyleId, setShotStyleId] = useState<ShotStyleId>("espresso");
 
-  const drink = ESPRESSO_DRINKS.find((item) => item.id === drinkId) ?? ESPRESSO_DRINKS[0];
-  const shotStyle = SHOT_STYLES.find((item) => item.id === shotStyleId) ?? SHOT_STYLES[1];
-  const espressoYield = Math.round(dose * shotStyle.ratio);
-  const scale = dose / 18;
-  const milk = Math.round(drink.milk * scale);
-  const water = Math.round(drink.water * scale);
-  const steps = buildEspressoSteps(drink.id, dose, espressoYield, milk, water, shotStyle.time);
+  const { drink, shotStyle, espressoYield, milk, water, chocolate, ice, iceCream, cupCapacity, steps } = buildEspressoRecipe(drinkId, dose, shotStyleId);
+
+  function chooseDrink(id: EspressoDrinkId) {
+    const selected = ESPRESSO_DRINKS.find((item) => item.id === id) ?? ESPRESSO_DRINKS[0];
+    setDrinkId(id);
+    setDose(selected.defaultDose);
+    setShotStyleId(selected.defaultShot);
+  }
 
   return (
     <section className="espresso-section" id="espresso">
       <EspressoHeading />
-      <DrinkPicker selectedId={drinkId} onSelect={setDrinkId} />
+      <DrinkPicker selectedId={drinkId} onSelect={chooseDrink} />
+      <p className="field-hint">Elegir una bebida carga su dosis y extracción de referencia. Después puedes ajustar ambas; las cantidades de los ingredientes se adaptan.</p>
       <div className="espresso-workbench">
         <EspressoControls
           dose={dose}
@@ -38,11 +43,15 @@ export function EspressoPlanner() {
         <aside className="espresso-recipe" aria-live="polite">
           <div className="espresso-recipe-top"><span>RECETA RESULTANTE</span><span><Icon name="cup" /></span></div>
           <h2>{drink.name}</h2>
-          <p>Base {shotStyle.name.toLowerCase()} · {drink.subtitle}. Taza de {drink.cup}.</p>
+          <p>Base {shotStyle.name.toLowerCase()} · {drink.subtitle}.</p>
+          <p className="field-hint">Recipiente sugerido: unos {cupCapacity} ml, con margen. La crema, la espuma y el hielo cambian el volumen real.</p>
           <div className="drink-composition">
-            <div><i className="coffee-layer" style={{ height: `${Math.max(18, espressoYield / 3)}px` }} /><span>Espresso</span><strong>{espressoYield} g</strong></div>
+            <div><i className="coffee-layer" /><span>Espresso</span><strong>{espressoYield} g</strong></div>
             {water > 0 && <div><i className="water-layer" /><span>Agua</span><strong>{water} ml</strong></div>}
-            {milk > 0 && <div><i className="milk-layer" /><span>Leche</span><strong>{milk} ml</strong></div>}
+            {milk > 0 && <div><i className="milk-layer" /><span>{drink.milkMode === "foam" ? "Microespuma a servir" : drink.milkMode === "cold" ? "Leche fría" : drink.id === "cortado" ? "Leche orientativa" : "Leche"}</span><strong>{milk} ml</strong></div>}
+            {chocolate > 0 && <div><i className="foam-layer" /><span>Salsa de chocolate</span><strong>{chocolate} g</strong></div>}
+            {ice > 0 && <div><i className="water-layer" /><span>Hielo</span><strong>{ice} g</strong></div>}
+            {iceCream > 0 && <div><i className="milk-layer" /><span>Helado de vainilla</span><strong>{iceCream} g</strong></div>}
             {drink.extra && <div><i className="foam-layer" /><span>Acabado</span><strong>{drink.extra}</strong></div>}
           </div>
           <div className="espresso-steps">
@@ -54,10 +63,17 @@ export function EspressoPlanner() {
             ))}
           </div>
           <p className="milk-safety">
-            {milk > 0
-              ? "Texturiza la leche hasta 55–65 °C: brillante, sin burbujas grandes y sin sobrecalentar."
-              : "Usa agua fresca y una taza precalentada para conservar temperatura y aroma."}
+            {drink.milkMode === "cold"
+              ? "Esta preparación usa leche fría sin texturizar. El hielo se añade aparte y no reemplaza el agua del espresso."
+              : drink.milkMode === "foam"
+                ? "La cantidad indicada es solo la microespuma a servir; necesitas más leche en la jarra para texturizar correctamente."
+                : drink.milkMode === "steamed"
+                  ? "Leche medida en frío, salvo el cortado: al texturizar aumenta de volumen. Usa termómetro y busca unos 60–65 °C; para bebidas vegetales sigue las indicaciones del fabricante."
+                  : drink.id === "affogato"
+                    ? "Mantén el helado frío hasta el momento de servir y añade el espresso al final."
+                    : "Usa agua fresca y precalienta la taza. El peso del espresso se mide en gramos, sin convertirlo en mililitros por la crema."}
           </p>
+          <RecipeSources evidence={ESPRESSO_EVIDENCE[drink.id]} />
         </aside>
       </div>
       <div className="espresso-footnote">
@@ -74,7 +90,7 @@ function EspressoHeading() {
       <div>
         <div><p>RECETAS CON ESPRESSO</p><h1>Tu café favorito.<br /><em>Empieza con un buen shot.</em></h1></div>
       </div>
-      <p>Base moderna de especialidad: proporción 1:2,<br />extracción de 25–30 segundos y leche a 55–65 °C.</p>
+      <p>Base moderna de especialidad: proporción 1:2,<br />unos 25–30 segundos como referencia. Ajusta por sabor y equipo.</p>
     </div>
   );
 }
@@ -121,7 +137,7 @@ function EspressoControls(props: EspressoControlsProps) {
       <p className="eyebrow">CONFIGURA EL SHOT</p>
       <h2>La base de toda buena receta</h2>
       <div className="espresso-dose">
-        <span className="control-label">Dosis de café</span>
+        <span className="control-label">Dosis de café<small>Respeta la capacidad nominal de tu canasta.</small></span>
         <div className="stepper">
           <button disabled={dose <= 9} onClick={() => onDoseChange(Math.max(9, dose - 1))} aria-label="Reducir dosis">−</button>
           <div><strong>{dose}</strong><span>g</span></div>
@@ -151,7 +167,7 @@ function EspressoControls(props: EspressoControlsProps) {
       </div>
       <div className="dial-note">
         <b>Cómo calibrarlo</b>
-        <p>Busca primero {espressoYield} g en {shotStyle.time}. Si sale demasiado rápido, muele más fino; si tarda demasiado, más grueso. El sabor siempre tiene la última palabra.</p>
+        <p>Busca primero {espressoYield} g en {shotStyle.time}. Si sale demasiado rápido, muele más fino; si tarda demasiado, más grueso. El sabor siempre tiene la última palabra. No detengas la extracción solo para cumplir el reloj: ajusta la molienda para alcanzar el rendimiento previsto.</p>
       </div>
     </div>
   );

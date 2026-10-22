@@ -1,5 +1,7 @@
 import { useId, type CSSProperties } from "react";
 import { Icon, MethodIcon } from "./icons";
+import { RecipeSources } from "./recipe-sources";
+import { BREW_EVIDENCE } from "@/app/data/recipe-sources";
 import {
   FLAVORS,
   GRIND_LEVELS,
@@ -8,7 +10,7 @@ import {
   type Method,
   type RecipeProfile,
 } from "@/app/data/coffee";
-import { parseStepTime, type PreparationStep } from "@/app/lib/recipes";
+import { getBrewWater, parseStepTime, type PreparationStep } from "@/app/lib/recipes";
 
 type RangeControlProps = {
   label: string;
@@ -71,7 +73,7 @@ export function MethodSelector({ selectedMethod, onSelect }: MethodSelectorProps
     <>
       <div className="section-heading">
         <div><span className="section-index">01</span><h2>Elige tu método</h2></div>
-        <p>Cuatro formas de encontrar tu taza favorita.</p>
+        <p>Seis formas de encontrar tu taza favorita.</p>
       </div>
       <div className="method-grid">
         {METHODS.map((method) => {
@@ -144,7 +146,7 @@ export function BrewControls(props: BrewControlsProps) {
           ))}
         </div>
       </div>
-      <RangeControl hint={`Por cada gramo de café, usa ${ratio} ml de agua.`} label="Proporción" value={ratio} min={10} max={18} output={`1 : ${ratio}`} onChange={onRatioChange} scale={["Concentrado", "Equilibrado", "Suave"]} />
+      <RangeControl hint={`Por cada gramo de café, usa ${ratio} g de agua.`} label="Proporción" value={ratio} min={10} max={18} output={`1 : ${ratio}`} onChange={onRatioChange} scale={["Concentrado", "Equilibrado", "Suave"]} />
       <RangeControl label="Temperatura" value={temperature} min={80} max={98} output={`${temperature}°C`} onChange={onTemperatureChange} scale={["80°C", "90°C", "98°C"]} />
       <div className="control-block flavor-control">
         <span className="control-label">Perfil que buscas</span>
@@ -157,7 +159,7 @@ export function BrewControls(props: BrewControlsProps) {
             ))}
           </div>
           <p className="field-hint">
-            Al elegir un perfil se restablecen la proporción y temperatura recomendadas.
+            Los perfiles son puntos de partida, no garantizan un sabor. Elegir uno restablece proporción y temperatura.
           </p>
         </div>
       </div>
@@ -224,6 +226,7 @@ type RecipeCardProps = {
 
 export function RecipeCard(props: RecipeCardProps) {
   const { method, flavor, profile, coffee, water, temperature, recipeTime, timeLabel, seconds, running, saved, onOpenTimer, onResetTimer, onSave } = props;
+  const { brewWater, dilutionWater } = getBrewWater(method.id, water);
   const timerAction = running ? "Ver preparación" : seconds ? "Continuar receta" : "Iniciar receta";
 
   return (
@@ -233,9 +236,11 @@ export function RecipeCard(props: RecipeCardProps) {
       <p className="recipe-subtitle">{profile.description}</p>
       <div className="recipe-metrics">
         <div><span>Café</span><strong>{coffee}<small>g</small></strong></div>
-        <div><span>Agua</span><strong>{water}<small>ml</small></strong></div>
+        <div><span>Agua total</span><strong>{water}<small>g</small></strong></div>
         <div><span>Temp.</span><strong>{temperature}<small>°C</small></strong></div>
       </div>
+      <p className="field-hint">Agua añadida, no volumen final: el café retiene parte. Pesa el agua; 1 g equivale aproximadamente a 1 ml.</p>
+      {dilutionWater > 0 && <p className="brew-water-note">En AeroPress: <b>{brewWater} g</b> en la cámara y <b>{dilutionWater} g</b> de dilución en la taza.</p>}
       <div className="recipe-details">
         <div><span>Molienda</span><b>{profile.grind}</b></div>
         <div><span>Tiempo total</span><b>{recipeTime}</b></div>
@@ -263,7 +268,7 @@ export function PreparationGuide({ method, steps }: { method: Method; steps: Pre
       <div className="guide-title">
         <div><p>PASO A PASO · {method.name.toUpperCase()}</p><h2>Es hora de preparar</h2></div>
       </div>
-      <p className="guide-intro">Ten todo listo y sigue los tiempos de tu receta. Cada vertido cuenta.</p><div className="timeline">
+      <p className="guide-intro">Inicia el reloj con el primer contacto del agua. Los tiempos son orientativos y cambian con la dosis y la molienda.</p><div className="timeline">
         {steps.map((step) => (
           <article key={`${step.time}-${step.title}`}>
             <span>{step.time}</span><div className="dot" />
@@ -271,6 +276,8 @@ export function PreparationGuide({ method, steps }: { method: Method; steps: Pre
           </article>
         ))}
       </div>
+      <p className="field-hint">Las guías de vertido son referencias para dosis habituales de 15–30 g. Usa un recipiente de capacidad suficiente; los lotes mayores pueden tardar más. Si el agua hierve por debajo de la temperatura elegida, úsala recién hervida sin intentar superar su ebullición local.</p>
+      <RecipeSources evidence={BREW_EVIDENCE[method.id]} />
     </section>
   );
 }
@@ -323,7 +330,7 @@ export function BrewFocus(props: BrewFocusProps) {
           <span>{running ? "TIEMPO TRANSCURRIDO" : seconds > 0 ? "TEMPORIZADOR EN PAUSA" : "TODO LISTO"}</span>
           <strong>{timeLabel}</strong>
           <div className="focus-metrics">
-            <span>{coffee} g café</span><span>{water} ml agua</span>
+            <span>{coffee} g café</span><span>{water} g agua total</span>
             <span>{temperature} °C</span><span>{profile.grind}</span>
             <span>Duración estimada: {recipeTime}</span>
           </div>
