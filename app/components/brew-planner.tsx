@@ -371,7 +371,7 @@ export function BrewFocus(props: BrewFocusProps) {
             aria-current={index === focusStep ? "step" : undefined}
             aria-label={`Ir al paso ${index + 1}: ${step.title}`}
           >
-            <i />{step.title}
+            <i aria-hidden="true" /><span className="focus-progress-number" aria-hidden="true">{index + 1}</span><span className="focus-progress-label">{step.title}</span>
           </button>
         ))}
       </div>

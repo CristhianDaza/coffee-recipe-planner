@@ -1592,11 +1592,13 @@ footer a {
   position: fixed;
   inset: 0;
   z-index: 100;
-  padding: 28px max(24px,4vw);
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-  overflow-y: auto;
+  height: 100dvh;
+  max-height: 100%;
+  padding: max(28px,env(safe-area-inset-top)) max(24px,4vw) max(28px,env(safe-area-inset-bottom));
+  display: grid;
+  grid-template-rows: auto minmax(0,1fr) auto auto;
+  gap: 24px;
+  overflow: hidden;
   background: var(--paper);
   color: var(--ink);
 }
@@ -1623,14 +1625,29 @@ footer a {
 }
 
 .focus-body {
-  flex: 1;
   width: 100%;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
   max-width: 1320px;
-  margin: auto;
+  margin: 0 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 4px;
+  scroll-padding-block: 12px;
   display: grid;
   grid-template-columns: minmax(0,.85fr) minmax(0,1fr) minmax(0,1fr);
   align-items: center;
   gap: 36px;
+}
+
+.focus-body > * {
+  min-width: 0;
+  flex-shrink: 0;
+}
+
+.focus-top > div {
+  min-width: 0;
 }
 
 .focus-timer {
@@ -1728,9 +1745,14 @@ footer a {
   box-shadow: 0 0 0 4px var(--accent-soft);
 }
 
+.focus-upcoming li > div {
+  min-width: 0;
+}
+
 .focus-upcoming li b {
   display: block;
-  font-size: 13px;
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .focus-upcoming li small {
@@ -1742,6 +1764,10 @@ footer a {
 
 .focus-upcoming li.current b {
   color: var(--coral);
+}
+
+.focus-progress-number {
+  display: none;
 }
 
 .focus-progress {
@@ -1888,7 +1914,9 @@ footer a {
     gap: 8px;
   }
   .focus-body {
-    grid-template-columns: 1fr 1.2fr;
+    grid-template-columns: minmax(0,1fr) minmax(0,1.2fr);
+    grid-auto-rows: max-content;
+    align-items: start;
   }
   .focus-upcoming {
     grid-column: 1/-1;
@@ -2142,29 +2170,54 @@ footer a {
     gap: 8px;
   }
   .brew-focus {
-    padding: 20px;
-    gap: 24px;
+    padding: max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
+    gap: 12px;
   }
   .focus-top h2 {
     font-size: 23px;
   }
   .focus-body {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 28px;
+    grid-template-columns: minmax(0,1fr);
+    grid-auto-rows: max-content;
+    align-content: start;
+    align-items: start;
+    gap: 24px;
   }
   .focus-timer>strong {
     font-size: 64px;
   }
   .focus-step h3 {
-    font-size: 32px;
+    font-size: 28px;
+    line-height: 1.25;
   }
   .focus-upcoming ol {
     display: block;
   }
+  .focus-progress {
+    gap: 8px;
+  }
   .focus-progress button {
-    font-size: 10px;
+    display: grid;
+    place-items: center;
+    padding: 8px 4px 0;
+    min-height: 44px;
+  }
+  .focus-progress-label {
+    display: none;
+  }
+  .focus-progress-number {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 14px;
+    line-height: 1;
+    background: var(--cream);
+  }
+  .focus-progress button.active .focus-progress-number {
+    background: var(--coral);
+    color: var(--paper);
   }
   .focus-actions {
     display: grid;
@@ -2250,30 +2303,15 @@ footer a {
   .brand-caption { letter-spacing: 1px; }
   .header-actions { gap: 6px; }
   .saved-button { padding-inline: 8px; }
-  .brew-focus {
-    display: grid;
-    grid-template-rows: auto minmax(0, 1fr) auto auto;
-    overflow: hidden;
-    gap: 16px;
-  }
   .focus-top { padding-bottom: 12px; }
-  .focus-body {
-    overflow-y: auto;
-    min-height: 0;
-    padding: 4px 4px 16px;
-    scroll-padding: 8px;
-  }
   .focus-timer > strong { margin: 8px 0 16px; }
   .focus-actions { padding-bottom: env(safe-area-inset-bottom); }
 }
 
-@media (min-width: 761px) and (max-width: 1023px) and (max-height: 600px) {
+@media (min-width: 480px) and (max-width: 1023px) and (max-height: 600px) {
   .brew-focus {
-    display: grid;
-    grid-template-rows: auto minmax(0, 1fr) auto auto;
-    overflow: hidden;
     gap: 12px;
-    padding: 16px 24px;
+    padding: max(16px,env(safe-area-inset-top)) max(24px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(24px,env(safe-area-inset-left));
   }
   .focus-top { padding-bottom: 8px; }
   .focus-top h2 { font-size: 22px; }
@@ -2286,7 +2324,17 @@ footer a {
   }
   .focus-timer > strong { font-size: 48px; margin: 8px 0; }
   .focus-step h3 { font-size: 28px; }
-  .focus-actions button { padding-block: 8px; }
+  .focus-actions {
+    display: grid;
+    grid-template-columns: auto minmax(0,1fr) auto auto;
+    gap: 10px;
+  }
+  .focus-primary, .focus-finish {
+    grid-column: auto;
+    grid-row: auto;
+    min-width: 0;
+  }
+  .focus-actions button { padding: 8px 12px; }
 }
 
 .recipe-sources {

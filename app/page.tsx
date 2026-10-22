@@ -266,7 +266,7 @@ export default function Home() {
           onUndo={deletedRecipe ? undoDelete : undefined}
         />
       )}
-      {toastMessage && <SavedToast message={toastMessage} onUndo={!recipesOpen && deletedRecipe && toastMessage === "Receta eliminada" ? undoDelete : undefined} />}
+      {toastMessage && !focusOpen && <SavedToast message={toastMessage} onUndo={!recipesOpen && deletedRecipe && toastMessage === "Receta eliminada" ? undoDelete : undefined} />}
       <SiteFooter />
     </main>
   );
