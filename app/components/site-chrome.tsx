@@ -1,5 +1,5 @@
-import Link from "next/link";
-import Image from "next/image";
+/* eslint-disable @next/next/no-html-link-for-pages -- Native navigation avoids unavailable RSC segment URLs on the static cPanel export. */
+import { Icon } from "./icons";
 
 type SiteHeaderProps = {
   theme: "light" | "dark";
@@ -19,62 +19,48 @@ export function SiteHeader({
   const nextTheme = theme === "light" ? "oscuro" : "claro";
 
   return (
-    <header className="site-header">
-      <Link className="brand" href="/">
-        <span className="brand-mark" aria-hidden="true">
-          <svg viewBox="0 0 32 32" role="img">
-            <path d="M7 12h15v7.5A6.5 6.5 0 0 1 15.5 26h-2A6.5 6.5 0 0 1 7 19.5V12Z" />
-            <path d="M22 15h2.5a3.5 3.5 0 0 1 0 7H22M11 8c-1.5-1.5 1.5-2.5 0-4M17 8c-1.5-1.5 1.5-2.5 0-4" />
-          </svg>
-        </span>
-        <span>Coffee Recipe Planner</span>
-      </Link>
-      <nav>
-        <Link className={`${activePage === "planner" ? "active" : ""} ${activePage === "espresso" ? "mobile-view-link" : ""}`.trim()} href="/#planner">Planificador</Link>
-        <Link className={`${activePage === "espresso" ? "active" : ""} ${activePage === "planner" ? "mobile-view-link" : ""}`.trim()} href="/espresso">Espresso</Link>
-        <button
-          className="theme-button"
-          onClick={onToggleTheme}
-          aria-label={`Activar modo ${nextTheme}`}
-          title={`Activar modo ${nextTheme}`}
-        >
-          <span aria-hidden="true">{theme === "light" ? "☾" : "☀"}</span>
-        </button>
-        {onOpenRecipes && (
-          <button className="saved-button" onClick={onOpenRecipes}>
-            <span>♡</span> Mis recetas
-            {savedRecipesCount > 0 && <b>{savedRecipesCount}</b>}
-          </button>
-        )}
-      </nav>
-    </header>
+    <>
+      <a className="skip-link" href="#main-content">Saltar al contenido</a>
+      <header className="site-header">
+        <a className="brand" href="/" aria-label="Coffee Recipe Planner, inicio">
+          <span className="brand-mark"><Icon name="cup" /></span>
+          <span>Coffee<span className="brand-caption">RECIPE PLANNER</span></span>
+        </a>
+        <nav aria-label="Navegación principal">
+          <a className={activePage === "planner" ? "active" : ""} aria-current={activePage === "planner" ? "page" : undefined} href="/#planner">Filtrados</a>
+          <a className={activePage === "espresso" ? "active" : ""} aria-current={activePage === "espresso" ? "page" : undefined} href="/espresso/">Espresso</a>
+        </nav>
+        <div className="header-actions">
+          {onOpenRecipes && <button className="saved-button" onClick={onOpenRecipes} aria-label={`Mis recetas${savedRecipesCount ? `, ${savedRecipesCount} guardadas` : ""}`} title="Mis recetas"><Icon name="bookmark" /><span>Mis recetas</span>{savedRecipesCount > 0 && <b>{savedRecipesCount}</b>}</button>}
+          <button className="theme-button" onClick={onToggleTheme} aria-label={`Activar modo ${nextTheme}`} title={`Activar modo ${nextTheme}`}><Icon name={theme === "light" ? "moon" : "sun"} /></button>
+        </div>
+      </header>
+    </>
   );
 }
 
 export function Hero() {
   return (
     <section className="hero" id="top">
-      <div className="hero-kicker"><span /> TU CAFÉ, A TU MANERA</div>
-      <h1>Diseña. Prepara.<br /><em>Disfruta.</em></h1>
-      <p>
-        Ajusta cada variable y crea una receta que se adapte
-        <br className="desktop-break" /> perfectamente a tu gusto.
-      </p>
-      <Image
-        className="hero-og"
-        src="/og.png"
-        alt="Café filtrado preparado en V60"
-        width={360}
-        height={180}
-        loading="eager"
-        sizes="(max-width: 760px) 0px, 27vw"
-      />
-      <div className="bean bean-one" />
-      <div className="bean bean-two" />
-      <div className="blue-spark">✦</div>
-      <svg className="hero-line" viewBox="0 0 900 190" fill="none">
-        <path d="M12 164C165 154 241 130 342 84C433 43 506 47 540 82C565 108 538 130 512 109C477 80 536 41 613 31C699 20 754 36 888 8" />
-      </svg>
+      <div className="hero-copy">
+        <div className="hero-kicker"><span /> EL RITUAL EMPIEZA AQUÍ</div>
+        <h1>Una mejor taza.<br /><em>A tu manera.</em></h1>
+        <p>Encuentra tu equilibrio entre café, agua y tiempo.<br className="desktop-break" /> Nosotros te acompañamos, paso a paso.</p>
+        <a className="hero-link" href="#planner">Diseña tu receta <Icon name="arrow" /></a>
+      </div>
+      <div className="hero-ritual" aria-hidden="true">
+        <div className="ritual-orbit" />
+        <svg className="ritual-brewer" viewBox="0 0 240 220" fill="none">
+          <path d="M94 20c-12 12 13 13 0 27m25-33c-12 12 13 13 0 27m25-21c-12 12 13 13 0 27" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          <path d="m56 59 58 74h12l58-74H56Z" fill="var(--paper)" stroke="currentColor" strokeWidth="2" />
+          <path d="m76 61 38 70m48-70-36 70m-6-70v70M51 137h138" stroke="currentColor" strokeWidth="2" />
+          <path d="M99 139v10l-24 43c-5 9 1 14 11 14h68c10 0 16-5 11-14l-24-43v-10" fill="var(--paper)" stroke="currentColor" strokeWidth="2" />
+          <path d="m86 181-8 15c-2 4 3 6 8 6h68c5 0 10-2 8-6l-8-15H86Z" fill="currentColor" />
+          <path d="M143 151h16c20 0 20 28 0 28h-2" stroke="currentColor" strokeWidth="2" />
+        </svg>
+        <span className="ritual-note">Pequeños ajustes.<br /><em>Grandes mañanas.</em></span>
+        <span className="ritual-label">CAFÉ + AGUA + UN MOMENTO PARA TI</span>
+      </div>
     </section>
   );
 }
@@ -82,13 +68,13 @@ export function Hero() {
 export function SiteFooter() {
   return (
     <footer>
-      <span>Coffee Recipe Planner</span>
+      <span className="footer-brand"><Icon name="cup" /> Coffee Recipe Planner</span>
       <p>Mejores variables. Mejores mañanas.</p>
       <a href="#top">Volver arriba ↑</a>
     </footer>
   );
 }
 
-export function SavedToast({ message }: { message: string }) {
-  return <div className="toast" role="status">{message} <span>✓</span></div>;
+export function SavedToast({ message, onUndo }: { message: string; onUndo?: () => void }) {
+  return <div className="toast" role="status"><Icon name="check" /><span>{message}</span>{onUndo && <button onClick={onUndo}>Deshacer</button>}</div>;
 }

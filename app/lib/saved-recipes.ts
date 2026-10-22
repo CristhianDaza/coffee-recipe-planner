@@ -76,6 +76,10 @@ function isSavedRecipe(value: unknown): value is SavedRecipe {
     && isFiniteNumber(recipe.ratio)
     && isFiniteNumber(recipe.temperature)
     && isFiniteNumber(recipe.createdAt)
+    && recipe.createdAt >= 0 && recipe.createdAt <= 8640000000000000
+    && recipe.coffee >= 8 && recipe.coffee <= (recipe.methodId === "aero" ? 20 : 60)
+    && recipe.ratio >= 10 && recipe.ratio <= 18
+    && recipe.temperature >= 80 && recipe.temperature <= 98
   );
 }
 

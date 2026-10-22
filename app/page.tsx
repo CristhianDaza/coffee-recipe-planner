@@ -30,6 +30,8 @@ import {
   type SavedRecipe,
 } from "@/app/lib/saved-recipes";
 
+import { useModalBehavior } from "@/app/lib/use-modal-behavior";
+
 type Theme = "light" | "dark";
 
 export default function Home() {
@@ -46,6 +48,7 @@ export default function Home() {
   const [theme, setTheme] = useState<Theme>("light");
   const [focusOpen, setFocusOpen] = useState(false);
   const [focusStep, setFocusStep] = useState(0);
+  const [deletedRecipe, setDeletedRecipe] = useState<SavedRecipe | null>(null);
   const savedTimeoutRef = useRef<number | null>(null);
 
   const method = METHODS.find((item) => item.id === methodId) ?? METHODS[0];
@@ -118,13 +121,14 @@ export default function Home() {
     const nextTheme = theme === "light" ? "dark" : "light";
     setTheme(nextTheme);
     document.documentElement.dataset.theme = nextTheme;
-    window.localStorage.setItem("coffee-theme", nextTheme);
+    try { window.localStorage.setItem("coffee-theme", nextTheme); } catch { /* Keep the selected theme for this visit if storage is unavailable. */ }
   }
 
   function showToast(message: string) {
+    setDeletedRecipe(null);
     setToastMessage(message);
     if (savedTimeoutRef.current) window.clearTimeout(savedTimeoutRef.current);
-    savedTimeoutRef.current = window.setTimeout(() => setToastMessage(null), 2200);
+    savedTimeoutRef.current = window.setTimeout(() => setToastMessage(null), 5000);
   }
 
   function saveCurrentRecipe() {
@@ -135,8 +139,7 @@ export default function Home() {
       ratio,
       temperature,
     });
-    setSavedRecipes(nextRecipes);
-    writeSavedRecipes(nextRecipes);
+    if (!persistRecipes(nextRecipes)) return;
     showToast("Receta guardada");
   }
 
@@ -150,14 +153,39 @@ export default function Home() {
     setRecipesOpen(false);
     showToast("Receta cargada");
     window.requestAnimationFrame(() => {
-      document.getElementById("planner")?.scrollIntoView({ behavior: "smooth" });
+      document.getElementById("planner")?.scrollIntoView({
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+      });
     });
   }
 
+  function persistRecipes(nextRecipes: SavedRecipe[]) {
+    try {
+      writeSavedRecipes(nextRecipes);
+      setSavedRecipes(nextRecipes);
+      return true;
+    } catch {
+      showToast("No se pudo guardar. Revisa el almacenamiento de tu navegador e inténtalo de nuevo.");
+      return false;
+    }
+  }
+
   function deleteSavedRecipe(id: string) {
-    const nextRecipes = savedRecipes.filter((recipe) => recipe.id !== id);
-    setSavedRecipes(nextRecipes);
-    writeSavedRecipes(nextRecipes);
+    const recipe = savedRecipes.find((item) => item.id === id);
+    const nextRecipes = savedRecipes.filter((item) => item.id !== id);
+    if (!persistRecipes(nextRecipes)) return;
+    showToast("Receta eliminada");
+    setDeletedRecipe(recipe ?? null);
+    window.requestAnimationFrame(() => document.querySelector<HTMLButtonElement>(".saved-undo button")?.focus());
+  }
+
+  function undoDelete() {
+    if (!deletedRecipe) return;
+    const nextRecipes = [...savedRecipes, deletedRecipe].sort((a, b) => b.createdAt - a.createdAt);
+    if (persistRecipes(nextRecipes)) {
+      showToast("Receta restaurada");
+      window.requestAnimationFrame(() => document.querySelector<HTMLButtonElement>(".saved-recipe-load")?.focus());
+    }
   }
 
   return (
@@ -168,42 +196,44 @@ export default function Home() {
         onToggleTheme={toggleTheme}
         onOpenRecipes={() => setRecipesOpen(true)}
       />
-      <Hero />
-      <section className="planner-shell" id="planner">
-        <MethodSelector selectedMethod={method} onSelect={chooseMethod} />
-        <div className="workbench">
-          <BrewControls
-            coffee={coffee}
-            ratio={ratio}
-            temperature={temperature}
-            flavor={flavor}
-            profile={profile}
-            doseOptions={doseOptions}
-            maxDose={maxDose}
-            onCoffeeChange={setCoffee}
-            onRatioChange={setRatio}
-            onTemperatureChange={setTemperature}
-            onFlavorChange={chooseFlavor}
-          />
-          <RecipeCard
-            method={method}
-            flavor={flavor}
-            profile={profile}
-            coffee={coffee}
-            water={water}
-            temperature={temperature}
-            recipeTime={recipeTime}
-            timeLabel={timeLabel}
-            seconds={seconds}
-            running={running}
-            saved={toastMessage === "Receta guardada"}
-            onOpenTimer={openTimer}
-            onResetTimer={resetTimer}
-            onSave={saveCurrentRecipe}
-          />
-        </div>
-      </section>
-      <PreparationGuide method={method} steps={steps} />
+      <div id="main-content" tabIndex={-1}>
+        <Hero />
+        <section className="planner-shell" id="planner">
+          <MethodSelector selectedMethod={method} onSelect={chooseMethod} />
+          <div className="workbench">
+            <BrewControls
+              coffee={coffee}
+              ratio={ratio}
+              temperature={temperature}
+              flavor={flavor}
+              profile={profile}
+              doseOptions={doseOptions}
+              maxDose={maxDose}
+              onCoffeeChange={(value) => { setCoffee(value); resetTimer(); }}
+              onRatioChange={(value) => { setRatio(value); resetTimer(); }}
+              onTemperatureChange={(value) => { setTemperature(value); resetTimer(); }}
+              onFlavorChange={chooseFlavor}
+            />
+            <RecipeCard
+              method={method}
+              flavor={flavor}
+              profile={profile}
+              coffee={coffee}
+              water={water}
+              temperature={temperature}
+              recipeTime={recipeTime}
+              timeLabel={timeLabel}
+              seconds={seconds}
+              running={running}
+              saved={toastMessage === "Receta guardada"}
+              onOpenTimer={openTimer}
+              onResetTimer={resetTimer}
+              onSave={saveCurrentRecipe}
+            />
+          </div>
+        </section>
+        <PreparationGuide method={method} steps={steps} />
+      </div>
       {focusOpen && (
         <BrewFocus
           method={method}
@@ -220,7 +250,7 @@ export default function Home() {
           running={running}
           onClose={closeFocus}
           onFinish={finishRecipe}
-          onStepChange={setFocusStep}
+          onStepChange={(step) => { setRunning(false); setFocusStep(step); }}
           onRunningChange={setRunning}
         />
       )}
@@ -230,9 +260,10 @@ export default function Home() {
           onClose={closeRecipes}
           onLoad={loadSavedRecipe}
           onDelete={deleteSavedRecipe}
+          onUndo={deletedRecipe ? undoDelete : undefined}
         />
       )}
-      {toastMessage && <SavedToast message={toastMessage} />}
+      {toastMessage && <SavedToast message={toastMessage} onUndo={!recipesOpen && deletedRecipe && toastMessage === "Receta eliminada" ? undoDelete : undefined} />}
       <SiteFooter />
     </main>
   );
@@ -240,7 +271,8 @@ export default function Home() {
 
 function useThemeInitialization(setTheme: (theme: Theme) => void) {
   useEffect(() => {
-    const storedTheme = window.localStorage.getItem("coffee-theme");
+    let storedTheme: string | null = null;
+    try { storedTheme = window.localStorage.getItem("coffee-theme"); } catch { /* Fall back to the system preference. */ }
     const preferredTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
     const initialTheme: Theme = storedTheme === "dark" || storedTheme === "light" ? storedTheme : preferredTheme;
     setTheme(initialTheme);
@@ -259,7 +291,15 @@ function useSavedRecipesInitialization(
 function useBrewTimer(running: boolean, setSeconds: (updater: (value: number) => number) => void) {
   useEffect(() => {
     if (!running) return;
-    const interval = window.setInterval(() => setSeconds((value) => value + 1), 1000);
+    let lastTick = Date.now();
+    const interval = window.setInterval(() => {
+      const now = Date.now();
+      const elapsed = Math.floor((now - lastTick) / 1000);
+      if (elapsed > 0) {
+        setSeconds((value) => value + elapsed);
+        lastTick += elapsed * 1000;
+      }
+    }, 250);
     return () => window.clearInterval(interval);
   }, [running, setSeconds]);
 }
@@ -284,21 +324,4 @@ function useActivePreparationStep(options: ActiveStepOptions) {
     });
     setFocusStep(activeStep);
   }, [running, focusOpen, seconds, steps, setFocusStep]);
-}
-
-function useModalBehavior({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
-  useEffect(() => {
-    if (!isOpen) return;
-    document.body.style.overflow = "hidden";
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") onClose();
-    }
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isOpen, onClose]);
 }

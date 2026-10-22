@@ -1,3 +1,4 @@
+import { Icon, MethodIcon } from "./icons";
 import { METHODS } from "@/app/data/coffee";
 import type { SavedRecipe } from "@/app/lib/saved-recipes";
 
@@ -6,6 +7,7 @@ type SavedRecipesDialogProps = {
   onClose: () => void;
   onLoad: (recipe: SavedRecipe) => void;
   onDelete: (id: string) => void;
+  onUndo?: () => void;
 };
 
 export function SavedRecipesDialog({
@@ -13,6 +15,7 @@ export function SavedRecipesDialog({
   onClose,
   onLoad,
   onDelete,
+  onUndo,
 }: SavedRecipesDialogProps) {
   return (
     <div className="saved-recipes-overlay" role="presentation" onMouseDown={onClose}>
@@ -26,14 +29,14 @@ export function SavedRecipesDialog({
         <header className="saved-recipes-header">
           <div>
             <span>TU COLECCIÓN</span>
-            <h2 id="saved-recipes-title">Mis recetas</h2>
+            <h2 id="saved-recipes-title">Mis recetas</h2><p>Guardadas en este navegador, listas para repetir.</p>
           </div>
-          <button onClick={onClose} aria-label="Cerrar mis recetas">×</button>
+          <button onClick={onClose} aria-label="Cerrar mis recetas"><Icon name="close" /></button>
         </header>
 
         {recipes.length === 0 ? (
           <div className="saved-recipes-empty">
-            <span aria-hidden="true">♡</span>
+            <span aria-hidden="true"><Icon name="bookmark" /></span>
             <h3>Aún no tienes recetas</h3>
             <p>Ajusta una preparación y selecciona “Guardar receta” para añadirla a esta colección.</p>
             <button onClick={onClose}>Crear mi primera receta</button>
@@ -50,6 +53,7 @@ export function SavedRecipesDialog({
             ))}
           </div>
         )}
+        {onUndo && <div className="saved-undo" role="status"><span>Receta eliminada</span><button onClick={onUndo}>Deshacer</button></div>}
       </section>
     </div>
   );
@@ -68,7 +72,7 @@ function SavedRecipeItem({ recipe, onLoad, onDelete }: SavedRecipeItemProps) {
   return (
     <article className="saved-recipe-item">
       <div className="saved-recipe-title">
-        <span>{method.icon}</span>
+        <span><MethodIcon id={method.id} /></span>
         <div>
           <h3>{method.name} {recipe.flavor}</h3>
           <small>{formatSavedDate(recipe.createdAt)}</small>

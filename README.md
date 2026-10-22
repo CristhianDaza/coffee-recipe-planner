@@ -61,7 +61,11 @@ Las cantidades de agua y leche se adaptan proporcionalmente a la dosis seleccion
 - Estados y controles accesibles mediante etiquetas semánticas.
 - Animaciones desactivadas cuando el usuario prefiere movimiento reducido.
 - Colección de recetas persistente en el navegador.
-- Posibilidad de cargar o eliminar configuraciones guardadas.
+- Posibilidad de cargar o eliminar configuraciones guardadas, con opción de deshacer.
+- Diálogos con navegación completa por teclado y retorno del foco.
+- Acciones de preparación siempre visibles en móvil y orientación horizontal.
+- Temporizador que recupera el tiempo transcurrido cuando la pestaña queda en segundo plano.
+- Mensajes de recuperación si el navegador no permite guardar recetas.
 - Confirmación visual al guardar o cargar una receta.
 
 ## Criterios de cálculo
@@ -96,3 +100,7 @@ Los datos de dominio y las funciones de cálculo están separados de los compone
 ## Alcance actual
 
 La aplicación no requiere cuentas. Las recetas se almacenan localmente en el navegador del usuario, por lo que permanecen disponibles al recargar la página, pero no se sincronizan entre navegadores o dispositivos. Toda la información necesaria para calcular las recetas está incluida en el proyecto y no depende de servicios externos.
+
+## Sistema visual
+
+La dirección visual, los tokens de ambos temas y los patrones de interacción se documentan en [el sistema de diseño](design-system/coffee-recipe-planner/MASTER.md).

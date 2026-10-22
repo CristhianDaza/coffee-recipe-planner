@@ -1,5 +1,6 @@
 "use client";
 
+import { Icon } from "./icons";
 import { useState } from "react";
 import {
   ESPRESSO_DRINKS,
@@ -35,8 +36,8 @@ export function EspressoPlanner() {
           onShotStyleChange={setShotStyleId}
         />
         <aside className="espresso-recipe" aria-live="polite">
-          <div className="espresso-recipe-top"><span>RECETA RESULTANTE</span><span>{drink.icon}</span></div>
-          <h3>{drink.name}</h3>
+          <div className="espresso-recipe-top"><span>RECETA RESULTANTE</span><span><Icon name="cup" /></span></div>
+          <h2>{drink.name}</h2>
           <p>Base {shotStyle.name.toLowerCase()} · {drink.subtitle}. Taza de {drink.cup}.</p>
           <div className="drink-composition">
             <div><i className="coffee-layer" style={{ height: `${Math.max(18, espressoYield / 3)}px` }} /><span>Espresso</span><strong>{espressoYield} g</strong></div>
@@ -71,7 +72,7 @@ function EspressoHeading() {
   return (
     <div className="espresso-heading">
       <div>
-        <div><p>RECETAS CON ESPRESSO</p><h2>Del shot a tu bebida favorita</h2></div>
+        <div><p>RECETAS CON ESPRESSO</p><h1>Tu café favorito.<br /><em>Empieza con un buen shot.</em></h1></div>
       </div>
       <p>Base moderna de especialidad: proporción 1:2,<br />extracción de 25–30 segundos y leche a 55–65 °C.</p>
     </div>
@@ -87,7 +88,7 @@ function DrinkPicker({ selectedId, onSelect }: DrinkPickerProps) {
   return (
     <div className="drink-picker">
       <span className="picker-label">ELIGE LA BEBIDA</span>
-      <div className="drink-tabs" role="list" aria-label="Bebidas con espresso">
+      <div className="drink-tabs" role="group" aria-label="Bebidas con espresso">
         {ESPRESSO_DRINKS.map((drink) => (
           <button
             key={drink.id}
@@ -95,7 +96,7 @@ function DrinkPicker({ selectedId, onSelect }: DrinkPickerProps) {
             onClick={() => onSelect(drink.id)}
             aria-pressed={selectedId === drink.id}
           >
-            <span>{drink.icon}</span><strong>{drink.name}</strong><small>{drink.subtitle}</small>
+            <span><Icon name="cup" /></span><strong>{drink.name}</strong><small>{drink.subtitle}</small>
           </button>
         ))}
       </div>
@@ -118,25 +119,25 @@ function EspressoControls(props: EspressoControlsProps) {
   return (
     <div className="espresso-controls">
       <p className="eyebrow">CONFIGURA EL SHOT</p>
-      <h3>La base de toda buena receta</h3>
+      <h2>La base de toda buena receta</h2>
       <div className="espresso-dose">
-        <label>Dosis de café</label>
+        <span className="control-label">Dosis de café</span>
         <div className="stepper">
-          <button onClick={() => onDoseChange(Math.max(9, dose - 1))} aria-label="Reducir dosis">−</button>
+          <button disabled={dose <= 9} onClick={() => onDoseChange(Math.max(9, dose - 1))} aria-label="Reducir dosis">−</button>
           <div><strong>{dose}</strong><span>g</span></div>
-          <button onClick={() => onDoseChange(Math.min(22, dose + 1))} aria-label="Aumentar dosis">+</button>
+          <button disabled={dose >= 22} onClick={() => onDoseChange(Math.min(22, dose + 1))} aria-label="Aumentar dosis">+</button>
         </div>
         <div className="quick-values">
           {[9, 18, 20].map((value) => (
-            <button key={value} className={dose === value ? "on" : ""} onClick={() => onDoseChange(value)}>{value}g</button>
+            <button key={value} aria-pressed={dose === value} className={dose === value ? "on" : ""} onClick={() => onDoseChange(value)}>{value}g</button>
           ))}
         </div>
       </div>
       <div className="shot-style-control">
-        <label>Estilo de extracción</label>
+        <span className="control-label">Estilo de extracción</span>
         <div>
           {SHOT_STYLES.map((style) => (
-            <button key={style.id} className={shotStyleId === style.id ? "on" : ""} onClick={() => onShotStyleChange(style.id)}>
+            <button key={style.id} aria-pressed={shotStyleId === style.id} className={shotStyleId === style.id ? "on" : ""} onClick={() => onShotStyleChange(style.id)}>
               <strong>{style.name}</strong><small>1:{style.ratio} · {style.description}</small>
             </button>
           ))}

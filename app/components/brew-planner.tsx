@@ -1,4 +1,5 @@
-import type { CSSProperties } from "react";
+import { useId, type CSSProperties } from "react";
+import { Icon, MethodIcon } from "./icons";
 import {
   FLAVORS,
   GRIND_LEVELS,
@@ -16,6 +17,7 @@ type RangeControlProps = {
   max: number;
   output: string;
   scale: string[];
+  hint?: string;
   onChange: (value: number) => void;
 };
 
@@ -26,8 +28,10 @@ export function RangeControl({
   max,
   output,
   scale,
+  hint,
   onChange,
 }: RangeControlProps) {
+  const id = useId();
   const rangeStyle = {
     "--range": `${((value - min) / (max - min)) * 100}%`,
   } as CSSProperties;
@@ -35,10 +39,13 @@ export function RangeControl({
   return (
     <div className="control-block">
       <div className="label-row">
-        <label>{label}</label>
-        <output>{output}</output>
+        <label htmlFor={id}>{label}</label>
+        <output htmlFor={id}>{output}</output>
       </div>
       <input
+        id={id}
+        aria-valuetext={output}
+        aria-describedby={hint ? `${id}-hint` : undefined}
         type="range"
         min={min}
         max={max}
@@ -46,6 +53,7 @@ export function RangeControl({
         onChange={(event) => onChange(Number(event.target.value))}
         style={rangeStyle}
       />
+      {hint && <p className="field-hint" id={`${id}-hint`}>{hint}</p>}
       <div className="scale">
         {scale.map((item) => <span key={item}>{item}</span>)}
       </div>
@@ -62,8 +70,8 @@ export function MethodSelector({ selectedMethod, onSelect }: MethodSelectorProps
   return (
     <>
       <div className="section-heading">
-        <div><h2>Elige tu método</h2></div>
-        <p>Cada método tiene su propia personalidad.<br />¿Cuál se ajusta a tu momento?</p>
+        <div><span className="section-index">01</span><h2>Elige tu método</h2></div>
+        <p>Cuatro formas de encontrar tu taza favorita.</p>
       </div>
       <div className="method-grid">
         {METHODS.map((method) => {
@@ -75,10 +83,10 @@ export function MethodSelector({ selectedMethod, onSelect }: MethodSelectorProps
               onClick={() => onSelect(method)}
               aria-pressed={isSelected}
             >
-              <span className="method-icon">{method.icon}</span>
+              <span className="method-icon"><MethodIcon id={method.id} /></span>
               <strong>{method.name}</strong>
               <small>{method.subtitle}</small>
-              {isSelected && <span className="check">✓</span>}
+              {isSelected && <span className="check"><Icon name="check" /></span>}
             </button>
           );
         })}
@@ -119,37 +127,37 @@ export function BrewControls(props: BrewControlsProps) {
   return (
     <div className="controls-panel">
       <div className="panel-title">
-        <div><h2>Ajusta las variables</h2><p>Pequeños cambios, grandes diferencias.</p></div>
+        <span className="section-index">02</span><div><h2>Hazla tuya</h2><p>Ajusta a tu gusto. Tu receta se actualiza al instante.</p></div>
       </div>
       <div className="control-block dose-control">
-        <label>Cantidad de café</label>
+        <span className="control-label">Cantidad de café<small>El punto de partida de tu receta.</small></span>
         <div className="stepper">
-          <button onClick={() => onCoffeeChange(Math.max(8, coffee - 1))} aria-label="Reducir un gramo">−</button>
+          <button disabled={coffee <= 8} onClick={() => onCoffeeChange(Math.max(8, coffee - 1))} aria-label="Reducir un gramo">−</button>
           <div><strong>{coffee}</strong><span>g</span></div>
-          <button onClick={() => onCoffeeChange(Math.min(maxDose, coffee + 1))} aria-label="Aumentar un gramo">+</button>
+          <button disabled={coffee >= maxDose} onClick={() => onCoffeeChange(Math.min(maxDose, coffee + 1))} aria-label="Aumentar un gramo">+</button>
         </div>
         <div className="quick-values">
           {doseOptions.map((value) => (
-            <button key={value} className={coffee === value ? "on" : ""} onClick={() => onCoffeeChange(value)}>
+            <button key={value} aria-pressed={coffee === value} className={coffee === value ? "on" : ""} onClick={() => onCoffeeChange(value)}>
               {value}g
             </button>
           ))}
         </div>
       </div>
-      <RangeControl label="Proporción" value={ratio} min={10} max={18} output={`1 : ${ratio}`} onChange={onRatioChange} scale={["Concentrado", "Equilibrado", "Suave"]} />
+      <RangeControl hint={`Por cada gramo de café, usa ${ratio} ml de agua.`} label="Proporción" value={ratio} min={10} max={18} output={`1 : ${ratio}`} onChange={onRatioChange} scale={["Concentrado", "Equilibrado", "Suave"]} />
       <RangeControl label="Temperatura" value={temperature} min={80} max={98} output={`${temperature}°C`} onChange={onTemperatureChange} scale={["80°C", "90°C", "98°C"]} />
       <div className="control-block flavor-control">
-        <label>Perfil que buscas</label>
+        <span className="control-label">Perfil que buscas</span>
         <div>
           <div className="segmented">
             {FLAVORS.map((item) => (
-              <button key={item} className={flavor === item ? "on" : ""} onClick={() => onFlavorChange(item)}>
+              <button key={item} aria-pressed={flavor === item} className={flavor === item ? "on" : ""} onClick={() => onFlavorChange(item)}>
                 {item}
               </button>
             ))}
           </div>
-          <p style={{ margin: "8px 0 0", color: "var(--coral)", fontSize: 9, lineHeight: 1.35, fontWeight: 700 }}>
-            Ajusta proporción, temperatura, molienda, tiempo y técnica.
+          <p className="field-hint">
+            Al elegir un perfil se restablecen la proporción y temperatura recomendadas.
           </p>
         </div>
       </div>
@@ -219,9 +227,9 @@ export function RecipeCard(props: RecipeCardProps) {
   const timerAction = running ? "Ver preparación" : seconds ? "Continuar receta" : "Iniciar receta";
 
   return (
-    <aside className="recipe-card" aria-live="polite">
-      <div className="recipe-top"><span>MI RECETA</span><span className="recipe-icon">{method.icon}</span></div>
-      <h2>{method.name} {flavor}</h2>
+    <aside className="recipe-card" aria-label="Tu receta personalizada">
+      <div className="recipe-top"><span>TU PRÓXIMA TAZA</span><span className="recipe-icon"><MethodIcon id={method.id} /></span></div>
+      <h2>{method.name}<span className="recipe-flavor">{flavor}</span></h2>
       <p className="recipe-subtitle">{profile.description}</p>
       <div className="recipe-metrics">
         <div><span>Café</span><strong>{coffee}<small>g</small></strong></div>
@@ -236,14 +244,14 @@ export function RecipeCard(props: RecipeCardProps) {
         <span>Temporizador</span>
         <strong>{timeLabel}</strong>
         <div>
-          <button className="timer-main" onClick={onOpenTimer}>{timerAction}</button>
+          <button className="timer-main" onClick={onOpenTimer}><Icon name="play" />{timerAction}<Icon name="arrow" /></button>
           {(running || seconds > 0) && (
-            <button className="timer-reset" onClick={onResetTimer} aria-label="Reiniciar">↺</button>
+            <button className="timer-reset" onClick={onResetTimer} aria-label="Reiniciar temporizador"><Icon name="reset" /></button>
           )}
         </div>
       </div>
       <button className="save-recipe" onClick={onSave}>
-        {saved ? "✓ Receta guardada" : "Guardar receta"}<span>♡</span>
+        <Icon name={saved ? "check" : "bookmark"} />{saved ? "Receta guardada" : "Guardar receta"}
       </button>
     </aside>
   );
@@ -255,7 +263,7 @@ export function PreparationGuide({ method, steps }: { method: Method; steps: Pre
       <div className="guide-title">
         <div><p>PASO A PASO · {method.name.toUpperCase()}</p><h2>Es hora de preparar</h2></div>
       </div>
-      <div className="timeline">
+      <p className="guide-intro">Ten todo listo y sigue los tiempos de tu receta. Cada vertido cuenta.</p><div className="timeline">
         {steps.map((step) => (
           <article key={`${step.time}-${step.title}`}>
             <span>{step.time}</span><div className="dot" />
@@ -308,11 +316,11 @@ export function BrewFocus(props: BrewFocusProps) {
     <div className="brew-focus" role="dialog" aria-modal="true" aria-label={`Preparación de ${method.name}`}>
       <div className="focus-top">
         <div><span>PREPARANDO</span><h2>{method.name} · {flavor}</h2></div>
-        <button onClick={onClose} aria-label="Cerrar preparación">×</button>
+        <button onClick={onClose} aria-label="Cerrar preparación"><Icon name="close" /></button>
       </div>
       <div className="focus-body">
         <div className="focus-timer">
-          <span>{running ? "TIEMPO TRANSCURRIDO" : "TODO LISTO"}</span>
+          <span>{running ? "TIEMPO TRANSCURRIDO" : seconds > 0 ? "TEMPORIZADOR EN PAUSA" : "TODO LISTO"}</span>
           <strong>{timeLabel}</strong>
           <div className="focus-metrics">
             <span>{coffee} g café</span><span>{water} ml agua</span>
@@ -320,7 +328,7 @@ export function BrewFocus(props: BrewFocusProps) {
             <span>Duración estimada: {recipeTime}</span>
           </div>
         </div>
-        <div className="focus-step">
+        <div className="focus-step" aria-live="polite" aria-atomic="true">
           <span className="focus-step-count">PASO {focusStep + 1} DE {steps.length}</span>
           <p className="focus-step-time">{activeStep.time}</p>
           <h3>{activeStep.title}</h3><p>{activeStep.text}</p>
@@ -353,7 +361,8 @@ export function BrewFocus(props: BrewFocusProps) {
             key={`${step.time}-${step.title}`}
             className={index === focusStep ? "active" : index < focusStep ? "done" : ""}
             onClick={() => onStepChange(index)}
-            aria-label={`Ir al paso ${index + 1}`}
+            aria-current={index === focusStep ? "step" : undefined}
+            aria-label={`Ir al paso ${index + 1}: ${step.title}`}
           >
             <i />{step.title}
           </button>

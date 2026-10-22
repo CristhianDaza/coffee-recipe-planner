@@ -15,13 +15,13 @@ export default function EspressoPage() {
     const nextTheme = theme === "light" ? "dark" : "light";
     setTheme(nextTheme);
     document.documentElement.dataset.theme = nextTheme;
-    window.localStorage.setItem("coffee-theme", nextTheme);
+    try { window.localStorage.setItem("coffee-theme", nextTheme); } catch { /* Keep the selected theme for this visit if storage is unavailable. */ }
   }
 
   return (
     <main className="espresso-page" id="top">
       <SiteHeader theme={theme} activePage="espresso" onToggleTheme={toggleTheme} />
-      <EspressoPlanner />
+      <div id="main-content" tabIndex={-1}><EspressoPlanner /></div>
       <SiteFooter />
     </main>
   );
@@ -29,7 +29,8 @@ export default function EspressoPage() {
 
 function useThemeInitialization(setTheme: (theme: Theme) => void) {
   useEffect(() => {
-    const storedTheme = window.localStorage.getItem("coffee-theme");
+    let storedTheme: string | null = null;
+    try { storedTheme = window.localStorage.getItem("coffee-theme"); } catch { /* Fall back to the system preference. */ }
     const preferredTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
     const initialTheme: Theme = storedTheme === "dark" || storedTheme === "light" ? storedTheme : preferredTheme;
     setTheme(initialTheme);
